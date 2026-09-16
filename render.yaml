@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: mini-job-queue-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_VERSION
+        value: 22
