@@ -8,19 +8,10 @@ dist/
 backend/dist/
 frontend/dist/
 *.tsbuildinfo
-backend/tsconfig.build.tsbuildinfo
 
 # SQLite local database
 *.sqlite
 backend/jobs.sqlite
-
-# Unused boilerplate and unconfigured test files
-backend/src/app.controller.ts
-backend/src/app.service.ts
-backend/src/app.controller.spec.ts
-backend/src/jobs/jobs.controller.spec.ts
-backend/src/jobs/jobs.service.spec.ts
-backend/test/app.e2e-spec.ts
 
 # Logs & Environment
 *.log

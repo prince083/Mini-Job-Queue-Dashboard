@@ -62,12 +62,4 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 jobs.sqlite
 *.sqlite
 
-# Unused boilerplate and unconfigured test files
-src/app.controller.ts
-src/app.service.ts
-src/app.controller.spec.ts
-src/jobs/jobs.controller.spec.ts
-src/jobs/jobs.service.spec.ts
-test/app.e2e-spec.ts
-tsconfig.build.tsbuildinfo
 
