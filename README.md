@@ -1,13 +1,18 @@
-# Job Orchestrator - Fullstack System
+# Mini Job Queue Dashboard & Job Orchestrator
 
-A fullstack job management platform featuring an asynchronous backend API built with NestJS and TypeORM, paired with a minimalist desktop dashboard built with React (TypeScript), Vite, and Tailwind CSS v3.
+A modern, production-grade fullstack job management platform featuring an asynchronous backend API built with NestJS, TypeORM, and SQLite, paired with a minimalist desktop dashboard built with React (TypeScript), Vite, and Tailwind CSS.
+
+[![Repository](https://img.shields.io/badge/GitHub-prince083%2FMini--Job--Queue--Dashboard-181717?style=flat&logo=github)](https://github.com/prince083/Mini-Job-Queue-Dashboard)
+[![Backend](https://img.shields.io/badge/Backend-NestJS%20v12-E0234E?style=flat&logo=nestjs)](https://nestjs.com/)
+[![Frontend](https://img.shields.io/badge/Frontend-React%2019%20%2B%20Vite-61DAFB?style=flat&logo=react)](https://react.dev/)
+[![Database](https://img.shields.io/badge/Database-SQLite%20via%20TypeORM-003B57?style=flat&logo=sqlite)](https://www.sqlite.org/)
 
 ---
 
 ## Table of Contents
 1. [Project Overview](#project-overview)
 2. [Tech Stack](#tech-stack)
-3. [Architecture & Design System](#architecture--design-system)
+3. [Architecture & Directory Structure](#architecture--directory-structure)
 4. [Backend Specification](#backend-specification)
    - [Database & Entities](#database--entities)
    - [Allowed State Transitions](#allowed-state-transitions)
@@ -15,70 +20,92 @@ A fullstack job management platform featuring an asynchronous backend API built 
 5. [Frontend Specification](#frontend-specification)
    - [Features](#features)
    - [Component Structure](#component-structure)
-   - [Theme & Aesthetics](#theme--aesthetics)
-6. [Setup and Installation Guide](#setup-and-installation-guide)
+   - [Design System & Aesthetics](#design-system--aesthetics)
+6. [Testing & Quality Assurance](#testing--quality-assurance)
+7. [Setup and Installation Guide](#setup-and-installation-guide)
    - [Prerequisites](#prerequisites)
+   - [Clone Repository](#clone-repository)
    - [Backend Setup](#backend-setup)
    - [Frontend Setup](#frontend-setup)
-7. [Environment & Port Configuration](#environment--port-configuration)
-8. [Ignored and Unnecessary Files](#ignored-and-unnecessary-files)
+8. [Environment & Port Configuration](#environment--port-configuration)
+9. [Git & Ignore Configuration](#git--ignore-configuration)
 
 ---
 
 ## Project Overview
 
-Job Orchestrator is designed to manage and track lifecycle transitions of background tasks and operational jobs. It provides:
-- Reliable persistence via SQLite and TypeORM.
-- Strict atomic status validation to guard against race conditions and invalid state progressions.
-- A desktop-focused, low-distraction UI with status counters, keyword search, contextual transition menus, and error boundary handling.
+**Job Orchestrator** is designed to manage, monitor, and track lifecycle transitions of background tasks and operational jobs. Key capabilities include:
+- **Persistent Storage**: Reliable local persistence using SQLite and TypeORM with automatic schema synchronization.
+- **Strict State Progression**: Atomic status transitions preventing race conditions and disallowing illegal lifecycle hops.
+- **Minimalist Aesthetic**: Low-distraction UI featuring curated Matcha Green and Roasted Coffee hues, responsive metrics counters, real-time search, contextual dropdown menus, and resilient error recovery.
+- **Full Test Coverage**: Unit tests with dependency injection mocks and E2E API tests via Vitest and Supertest.
 
 ---
 
 ## Tech Stack
 
 ### Backend
-- **Framework**: NestJS (v12) with Express platform
+- **Framework**: NestJS (v12) with Express HTTP engine
 - **Language**: TypeScript (Node.js ES modules)
 - **Database**: SQLite via `better-sqlite3` and `TypeORM`
 - **Validation**: `class-validator` and `class-transformer`
+- **Testing**: Vitest, `@nestjs/testing`, Supertest
 
 ### Frontend
 - **Framework**: React 19 with TypeScript
-- **Bundler / Dev Server**: Vite (running on port 5000)
+- **Tooling & Bundler**: Vite (running on port 5000)
 - **Styling**: Tailwind CSS v3 with custom PostCSS configuration
 - **Icons**: Lucide React
-- **HTTP Client**: Axios
+- **HTTP Client**: Axios with centralized error formatting and interceptors
 
 ---
 
-## Architecture & Design System
+## Architecture & Directory Structure
 
-The repository is structured as a monorepo containing both backend and frontend applications:
+The repository is organized as a clean monorepo containing both the API and client applications:
 
 ```text
-NestJs/
-├── .git/                      # Root Git repository
-├── .gitignore                 # Root Git exclusion rules
-├── README.md                  # Complete system documentation
+Mini-Job-Queue-Dashboard/
+├── .gitattributes             # Git LF line-ending normalization
+├── .gitignore                 # Root exclusion rules (node_modules, logs, databases)
+├── README.md                  # Comprehensive project documentation
 ├── backend/                   # NestJS API application
 │   ├── src/
-│   │   ├── jobs/              # Jobs module, entity, controller, service, DTOs
-│   │   ├── app.module.ts      # Root application module and TypeORM connection
-│   │   └── main.ts            # NestJS entrypoint, CORS configuration
+│   │   ├── jobs/              # Jobs entity, DTOs, controller, service, and unit tests
+│   │   │   ├── create-job.dto.ts
+│   │   │   ├── update-status.dto.ts
+│   │   │   ├── job.entity.ts
+│   │   │   ├── jobs.service.ts
+│   │   │   ├── jobs.service.spec.ts
+│   │   │   ├── jobs.controller.ts
+│   │   │   ├── jobs.controller.spec.ts
+│   │   │   └── jobs.module.ts
+│   │   ├── app.controller.ts  # Health check root controller
+│   │   ├── app.module.ts      # TypeORM configuration and module bundling
+│   │   └── main.ts            # NestJS bootstrap, CORS, ValidationPipe
+│   ├── test/                  # E2E test suites (app.e2e-spec.ts)
 │   ├── package.json
-│   └── tsconfig.json
-└── frontend/                  # React + TypeScript client
+│   ├── tsconfig.json
+│   └── vitest.config.ts
+└── frontend/                  # React + TypeScript Vite client
     ├── src/
-    │   ├── components/        # Header, StatusCards, JobFilters, JobTable, etc.
-    │   ├── services/          # Axios HTTP client with error formatting
-    │   ├── types/             # Domain TypeScript definitions and transition maps
-    │   ├── App.tsx            # Main application layout and state manager
-    │   ├── main.tsx           # React DOM root render
-    │   └── index.css          # Tailwind base layer
-    ├── index.html             # Desktop viewport with Inter typography
-    ├── tailwind.config.js     # Matcha and Coffee color tokens
+    │   ├── components/        # Header, StatusCards, JobFilters, JobTable, Modal, etc.
+    │   │   ├── Header.tsx
+    │   │   ├── StatusCards.tsx
+    │   │   ├── JobFilters.tsx
+    │   │   ├── JobTable.tsx
+    │   │   ├── CreateJobModal.tsx
+    │   │   ├── FeedbackBanner.tsx
+    │   │   └── LoadingSkeleton.tsx
+    │   ├── services/          # Axios HTTP service with base configuration
+    │   ├── types/             # Domain TypeScript interfaces and transition mappings
+    │   ├── App.tsx            # Main dashboard container and state orchestrator
+    │   ├── main.tsx           # React DOM root entry
+    │   └── index.css          # Tailwind base layer & CSS tokens
+    ├── index.html             # HTML entry with Inter font
+    ├── tailwind.config.js     # Matcha & Coffee custom theme definitions
     ├── postcss.config.js      # PostCSS configuration
-    ├── vite.config.ts         # Vite configuration (port 5000 + proxy)
+    ├── vite.config.ts         # Vite server (port 5000 + /jobs proxy)
     └── package.json
 ```
 
@@ -88,19 +115,19 @@ NestJs/
 
 ### Database & Entities
 
-The application utilizes a local SQLite database (`jobs.sqlite`) through TypeORM. The core entity is `Job`:
+The persistence layer uses a local SQLite database (`jobs.sqlite`). The core entity is `Job`:
 
 | Field | Type | Description |
 |---|---|---|
-| `id` | number (Primary Key) | Auto-incrementing identifier |
-| `title` | string | Description or title of the job |
-| `type` | string | Identifier tag (e.g. `data_export`, `email_sync`) |
-| `status` | JobStatus enum | Current job status (`pending`, `running`, `completed`, `failed`) |
-| `createdAt` | Date | Timestamp generated automatically on creation |
+| `id` | `number` (Primary Key) | Auto-incrementing identifier |
+| `title` | `string` | Job summary or descriptive task name |
+| `type` | `string` | Classification category (e.g. `data_export`, `email_digest`) |
+| `status` | `JobStatus` enum | Current state (`pending`, `running`, `completed`, `failed`) |
+| `createdAt` | `Date` | Timestamp generated automatically upon record creation |
 
 ### Allowed State Transitions
 
-Job transitions follow strict lifecycle constraints:
+Job status updates adhere strictly to the following state diagram:
 
 ```text
 pending  ───> running ───> completed (terminal)
@@ -111,23 +138,24 @@ pending  ───> running ───> completed (terminal)
     └───> failed (terminal)
 ```
 
-- **Pending**: Can transition to `running`, `completed`, or `failed`.
-- **Running**: Can transition to `completed` or `failed`.
-- **Completed**: Terminal state (no further transitions permitted).
-- **Failed**: Terminal state (no further transitions permitted).
+- **`pending`**: Can transition to `running`, `completed`, or `failed`.
+- **`running`**: Can transition to `completed` or `failed`.
+- **`completed`**: Terminal state (no further transitions permitted).
+- **`failed`**: Terminal state (no further transitions permitted).
 
-The backend executes optimistic concurrency checking on status transitions to guarantee atomic updates without race conditions.
+Attempting an invalid state transition results in an immediate `409 Conflict` HTTP response with a descriptive error message.
 
 ### API Endpoints
 
-All endpoints are rooted under `/jobs`:
+All job management endpoints are exposed under `/jobs`:
 
 | Method | Endpoint | Request Body | Description |
 |---|---|---|---|
-| `GET` | `/jobs` | None | Retrieves all jobs ordered by `createdAt DESC` |
-| `POST` | `/jobs` | `{ title: string, type: string }` | Creates a new job with initial status `pending` |
-| `PATCH` | `/jobs/:id/status` | `{ status: JobStatus }` | Updates job status following valid transition rules |
-| `DELETE`| `/jobs/:id` | None | Deletes job record |
+| `GET` | `/` | None | Service welcome / health verification |
+| `GET` | `/jobs` | None | Returns all jobs ordered chronologically (`createdAt DESC`) |
+| `POST` | `/jobs` | `{ "title": string, "type": string }` | Enqueues a new job with default status `pending` |
+| `PATCH` | `/jobs/:id/status` | `{ "status": JobStatus }` | Transitions job status according to validation matrix |
+| `DELETE`| `/jobs/:id` | None | Removes a job record by ID |
 
 ---
 
@@ -135,38 +163,60 @@ All endpoints are rooted under `/jobs`:
 
 ### Features
 
-1. **All Jobs Display**: Desktop table rendering ID, title, type tag, status badge, timestamp, contextual status dropdown, and deletion button.
-2. **Status Metrics**: Interactive counter cards showing counts for:
-   - Total Jobs
-   - Pending
-   - Running
-   - Completed
-   - Failed
-3. **Dynamic Filtering**:
-   - Status tabs filter records instantly. Clicking any metric card also selects that status filter.
-   - Real-time text search filters by job title or type with an instant clear button.
-4. **Job Creation**: Clean modal dialogue with field validation and pre-populated job type suggestions (`data_export`, `email_digest`, `report_generation`, `image_processing`).
-5. **Contextual Status Transitions**: The action dropdown only lists valid next statuses according to the transition matrix. Jobs in terminal states (`completed` or `failed`) display a `"Terminal state"` indicator.
-6. **Deletion with Confirmation**: Inline safety toggle (`Confirm` / `Cancel`) prevents accidental deletion.
-7. **Error & Loading States**:
-   - Loading skeletons during initial data fetch.
-   - Background refresh indicator on the header refresh button.
-   - Non-intrusive alert banner with server error messages and retry trigger.
+1. **Live Jobs Table**: Clean tabular layout presenting ID, title, job type tag, status pill, formatted creation timestamp, contextual action menu, and delete action.
+2. **Interactive Status Counters**: Five summary cards tracking total volume and count per status (`Total`, `Pending`, `Running`, `Completed`, `Failed`). Clicking any card instantly filters the table to that status.
+3. **Dual Filtering & Search**:
+   - Status tab pills with active highlight.
+   - Real-time text search filtering across job title and type with an instant clear button.
+4. **Create Job Dialog**: Accessible modal with form validation, submission loading states, and quick-pick type suggestion pills (`data_export`, `email_digest`, `report_generation`, `image_processing`).
+5. **Contextual Action Dropdowns**: The transition dropdown only offers legitimate forward statuses based on the job's current status. Terminal jobs display a clear `"Terminal state"` badge.
+6. **Safe Two-Step Deletion**: Inline confirmation toggle (`Confirm` / `Cancel`) prevents accidental job deletion.
+7. **Feedback & Resilience**:
+   - Skeleton shimmer loaders during initial data fetch.
+   - Non-blocking error notification banner with retry functionality.
+   - Live refresh indicator on the header action bar.
 
-### Theme & Aesthetics
+### Design System & Aesthetics
 
-- **Matcha Tea Palette**: Soft sage and forest greens used for running/completed states, primary action buttons, and active indicators:
+- **Matcha Green Palette**: Calming sage and forest tones used for active indicators, running/completed badges, and primary actions:
   - `matcha-50`: `#f4f7f4`
   - `matcha-100`: `#e5ece2`
   - `matcha-500`: `#5d8d55`
   - `matcha-700`: `#3c5b37`
-- **Brown Coffee Palette**: Warm roasted tones used for background canvases, borders, and typography:
+- **Roasted Coffee Palette**: Warm earthen tones providing soft contrast for cards, borders, and typography:
   - `coffee-50`: `#faf7f2`
   - `coffee-100`: `#f2eae0`
   - `coffee-200`: `#e3d3c1`
   - `coffee-600`: `#6f523d`
   - `coffee-900`: `#271c15`
-- **Minimalist Principles**: Clean borders, generous whitespace, Inter typography, and strictly zero emojis across code and interface.
+- **Typography & Layout**: Modern Inter font, clean borders, generous whitespace, and strictly zero emojis.
+
+---
+
+## Testing & Quality Assurance
+
+Both unit testing and end-to-end testing are configured out of the box using Vitest:
+
+### Running Backend Unit Tests
+```bash
+cd backend
+npm test
+```
+Runs unit test suites for `AppController`, `JobsService`, and `JobsController` with isolated dependency mocks.
+
+### Running Backend E2E Tests
+```bash
+cd backend
+npm run test:e2e
+```
+Executes full HTTP request lifecycle tests on a live NestJS test instance via Supertest.
+
+### Frontend Compilation & Build Check
+```bash
+cd frontend
+npm run build
+```
+Executes TypeScript type checking (`tsc`) and generates an optimized Vite production bundle.
 
 ---
 
@@ -175,13 +225,22 @@ All endpoints are rooted under `/jobs`:
 ### Prerequisites
 - **Node.js**: v18.0.0 or later (v22.x recommended)
 - **npm**: v9.x or later (v11.x recommended)
-- **Git**: Installed and available on system PATH
+- **Git**: Installed and configured on your path
+
+---
+
+### Clone Repository
+
+```bash
+git clone https://github.com/prince083/Mini-Job-Queue-Dashboard.git
+cd Mini-Job-Queue-Dashboard
+```
 
 ---
 
 ### Backend Setup
 
-1. Open a terminal and navigate to the `backend` directory:
+1. Navigate to the `backend` directory:
    ```bash
    cd backend
    ```
@@ -191,28 +250,28 @@ All endpoints are rooted under `/jobs`:
    npm install
    ```
 
-3. Build the backend:
+3. Build the application:
    ```bash
    npm run build
    ```
 
-4. Start the backend server:
-   - In development watch mode:
+4. Start the server:
+   - **Development mode** (with auto-reload):
      ```bash
      npm run start:dev
      ```
-   - In standard mode:
+   - **Production mode**:
      ```bash
      npm run start
      ```
 
-   The backend will start on **`http://localhost:3000`**.
+   The backend will be live at **`http://localhost:3000`**.
 
 ---
 
 ### Frontend Setup
 
-1. Open a second terminal and navigate to the `frontend` directory:
+1. Open a new terminal and navigate to the `frontend` directory:
    ```bash
    cd frontend
    ```
@@ -222,30 +281,29 @@ All endpoints are rooted under `/jobs`:
    npm install
    ```
 
-3. Start the Vite development server:
+3. Start the development server:
    ```bash
    npm run dev
    ```
 
-4. Access the dashboard:
-   Open your browser at **`http://localhost:5000`**.
+4. Open your browser at **`http://localhost:5000`** to access the dashboard.
 
 ---
 
 ## Environment & Port Configuration
 
-- **Backend Port**: `3000` (configurable via `PORT` environment variable in `backend/`).
+- **Backend Port**: `3000` (configurable via the `PORT` environment variable).
 - **Frontend Port**: `5000` (configured in `frontend/vite.config.ts`).
-- **CORS**: Enabled on the NestJS backend to permit cross-origin requests from `http://localhost:5000`.
-- **API Proxy**: The Vite development server is configured to proxy requests from `/jobs` to `http://localhost:3000`.
+- **CORS**: Configured in NestJS `main.ts` to allow cross-origin requests from `http://localhost:5000`.
+- **Vite Proxy**: Pre-configured in `vite.config.ts` to forward `/jobs` requests to `http://localhost:3000`.
 
 ---
 
-## Ignored and Unnecessary Files
+## Git & Ignore Configuration
 
-The project `.gitignore` files have been configured to exclude:
-- Unused NestJS scaffold boilerplate (`src/app.controller.ts`, `src/app.service.ts`, `src/app.controller.spec.ts`).
-- Unconfigured spec tests lacking dependency mocks (`src/jobs/jobs.controller.spec.ts`, `src/jobs/jobs.service.spec.ts`, `test/app.e2e-spec.ts`).
-- Incremental build caches (`tsconfig.build.tsbuildinfo`).
-- Local SQLite database files (`jobs.sqlite`).
-- Node dependencies (`node_modules/`) and compiled artifacts (`dist/`).
+- **`.gitattributes`**: Normalizes all repository text files to standard `LF` line endings across Windows, macOS, and Linux to prevent cross-platform CRLF false modifications.
+- **`.gitignore`**: Configured to cleanly ignore:
+  - Local database files (`jobs.sqlite`, `*.sqlite`).
+  - Dependencies (`node_modules/`) and build outputs (`dist/`, `build/`).
+  - TypeScript cache artifacts (`*.tsbuildinfo`).
+  - Environment variable files (`.env*`) and runtime logs.
